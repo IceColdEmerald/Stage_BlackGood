@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -8,8 +9,15 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float laneSpacing = 1.5f;
     [SerializeField] float laneSwitchSpeed = 12f;
 
+    [Header("Invincibility Settings")]
+    [SerializeField] float invincibilityDuration = 1.5f;
+    [SerializeField] float flashInterval = 0.15f;
+
     int currentLane = 0;
     float targetY = 0f;
+    
+    private SpriteRenderer spriteRenderer;
+    public bool IsInvincible { get; private set; } = false;
 
     void Start()
     {
@@ -20,8 +28,8 @@ public class PlayerController : MonoBehaviour
         p.z = 0f;
         transform.position = p;
 
-        var sr = GetComponent<SpriteRenderer>();
-        if (sr != null) sr.sortingOrder = 100;
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null) spriteRenderer.sortingOrder = 100;
     }
 
     void Update()
@@ -70,5 +78,32 @@ public class PlayerController : MonoBehaviour
         Vector3 pos = transform.position;
         pos.y = Mathf.Lerp(pos.y, targetY, laneSwitchSpeed * Time.deltaTime);
         transform.position = pos;
+    }
+
+    public void TriggerInvincibility()
+    {
+        if (!IsInvincible && gameObject.activeInHierarchy)
+        {
+            StartCoroutine(InvincibilityFlashRoutine());
+        }
+    }
+
+    private IEnumerator InvincibilityFlashRoutine()
+    {
+        IsInvincible = true;
+        float elapsed = 0f;
+
+        while (elapsed < invincibilityDuration)
+        {
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.enabled = !spriteRenderer.enabled;
+            }
+            yield return new WaitForSeconds(flashInterval);
+            elapsed += flashInterval;
+        }
+
+        if (spriteRenderer != null) spriteRenderer.enabled = true;
+        IsInvincible = false;
     }
 }

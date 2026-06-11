@@ -6,40 +6,42 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
-    [Header("References")]
-    [SerializeField] private Camera mainCamera;
-    [SerializeField] private RectTransform hotbarTransform;
-    [SerializeField] private TextMeshProUGUI txtLives;
-    [SerializeField] private TextMeshProUGUI txtScore;
-    [SerializeField] private RoadVisualizer roadVisualizer;
+    [SerializeField] Camera mainCamera;
+    [SerializeField] RectTransform hotbarTransform;
+    [SerializeField] TextMeshProUGUI txtLives;
+    [SerializeField] TextMeshProUGUI txtScore;
+    [SerializeField] RoadVisualizer roadVisualizer;
 
-    [Header("Player Stats")]
     public int lives = 3;
 
-    [Header("Difficulty Scaling")]
-    [SerializeField] int firstExpansion = 500;
-    [SerializeField] int secondExpansion = 1500;
+    [SerializeField] float firstExpansionTime = 60f;
+    [SerializeField] float secondExpansionTime = 120f;
+    [SerializeField] float maxDifficultyTime = 180f;
 
-    [Header("Score & Speed")]
+    public float FirstExpansionTime => firstExpansionTime;
+    public float SecondExpansionTime => secondExpansionTime;
+    public float MaxDifficultyTime => maxDifficultyTime;
+
     public float Score { get; private set; }
     public int HighScore { get; private set; }
     public float currentSpeed = 5f;
     public float maxSpeed = 20f;
     public float acceleration = 0.05f;
 
-    [Header("Progression Bounds")]
     public int allowedLaneRange { get; private set; } = 1;
 
-    [Header("Camera Scaling Configuration")]
-    [SerializeField] private float baseOrthoSize = 2.8f;
-    [SerializeField] private float zoomSpeed = 2.5f;
+    [SerializeField] float baseOrthoSize = 2.8f;
+    [SerializeField] float zoomSpeed = 2.5f;
 
-    private float targetOrthoSize;
-    private Vector3 targetCameraPos;
-    private bool gameOver;
+    float targetOrthoSize;
+    Vector3 targetCameraPos;
     public bool IsCameraZooming { get; private set; } = false;
-    [SerializeField] private float zoomEpsilon = 0.02f;
-    [SerializeField] private float posEpsilon = 0.01f;
+    [SerializeField] float zoomEpsilon = 0.02f;
+    [SerializeField] float posEpsilon = 0.01f;
+
+    bool gameOver;
+    public bool IsGameOver => gameOver;
+    public float GameTime { get; private set; }
 
     void Awake()
     {
@@ -76,6 +78,7 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         if (gameOver) return;
+        GameTime += Time.deltaTime;
         IncreaseSpeed();
         IncreaseScore();
         HandleProgression();
@@ -96,17 +99,17 @@ public class GameManager : MonoBehaviour
 
     void HandleProgression()
     {
-        if (Score >= firstExpansion && allowedLaneRange == 1 && !IsCameraZooming)
+        if (GameTime >= firstExpansionTime && allowedLaneRange == 1 && !IsCameraZooming)
         {
             StartCoroutine(ExpandAndEnable(2));
         }
-        else if (Score >= secondExpansion && allowedLaneRange == 2 && !IsCameraZooming)
+        else if (GameTime >= secondExpansionTime && allowedLaneRange == 2 && !IsCameraZooming)
         {
             StartCoroutine(ExpandAndEnable(3));
         }
     }
 
-    private IEnumerator ExpandAndEnable(int newRange)
+    IEnumerator ExpandAndEnable(int newRange)
     {
         if (IsCameraZooming) yield break;
         IsCameraZooming = true;
@@ -132,6 +135,15 @@ public class GameManager : MonoBehaviour
     {
         if (txtScore != null) txtScore.text = "Score - " + Mathf.FloorToInt(Score);
         if (txtLives != null) txtLives.text = "Lives - " + lives;
+    }
+
+    public void TakeDamage()
+    {
+        if (gameOver) return;
+        lives--;
+        UpdateUI();
+
+        if (lives <= 0) GameOver();
     }
 
     public void GameOver()

@@ -169,8 +169,9 @@ MonoBehaviour:
   txtScore: {fileID: 1753278988}
   roadVisualizer: {fileID: 0}
   lives: 3
-  firstExpansion: 100
-  secondExpansion: 200
+  firstExpansionTime: 60
+  secondExpansionTime: 120
+  maxDifficultyTime: 180
   currentSpeed: 5
   maxSpeed: 20
   acceleration: 0.05
@@ -315,6 +316,65 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 129731260}
   m_CullTransparentMesh: 1
+--- !u!1 &151639880
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 151639882}
+  - component: {fileID: 151639881}
+  m_Layer: 0
+  m_Name: --ObstacleSpawner--
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &151639881
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 151639880}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff7da3e6bf68f394a80a0a1560896ecd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ObstacleSpawner
+  obstaclePrefab: {fileID: 3246605174902914929, guid: 8974faff9dc249940b42d22a54d0fc4e, type: 3}
+  warningPrefabs:
+  - {fileID: 179354849284521580, guid: eeaeef2c1591e4947bb4113a343863b1, type: 3}
+  - {fileID: 4690836559791155277, guid: 5e0aecb4ef101e544afd270cb1205c5e, type: 3}
+  carObstaclePrefab: {fileID: 6664012287302956002, guid: d455db9b800fa9140b2ec6fb2a6d3e53, type: 3}
+  carWarningPrefab: {fileID: 4690836559791155277, guid: 064003169cd5f0c40898b6ac0e20f8f2, type: 3}
+  carIconChildName: Danger_Bubble_Icon
+  carSpawnChance: 0.4
+  startSpawnInterval: 4.5
+  endSpawnInterval: 1.1
+  startWarningDuration: 2.2
+  endWarningDuration: 0.7
+  spawnXOffset: 2
+  minIntervalVariance: 0.75
+  maxIntervalVariance: 1.25
+--- !u!4 &151639882
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 151639880}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &270169247
 GameObject:
   m_ObjectHideFlags: 0
@@ -627,9 +687,10 @@ GameObject:
   - component: {fileID: 1079282834}
   - component: {fileID: 1079282833}
   - component: {fileID: 1079282836}
+  - component: {fileID: 1079282837}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -752,6 +813,44 @@ MonoBehaviour:
   horizontalMargin: 0.5
   laneSpacing: 1.5
   laneSwitchSpeed: 12
+  invincibilityDuration: 1.5
+  flashInterval: 0.15
+--- !u!58 &1079282837
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1079282831}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_Radius: 0.5
 --- !u!1 &1163790725
 GameObject:
   m_ObjectHideFlags: 0
@@ -798,8 +897,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoadVisualizer
   laneSpacing: 1.5
   roadLength: 50
-  asphaltColor: {r: 0.25520113, g: 0.25520113, b: 0.2754717, a: 1}
-  markingColor: {r: 0.42179424, g: 0.5373658, b: 0.554717, a: 0.95}
+  asphaltColor: {r: 0.764151, g: 0.75167805, b: 0.5731132, a: 1}
+  markingColor: {r: 0.63910645, g: 0.8113208, b: 0.686227, a: 0.95}
   markingThickness: 0.06
   asphaltInset: 0.02
   laneMin: -3
@@ -1158,3 +1257,4 @@ SceneRoots:
   - {fileID: 270169250}
   - {fileID: 61456107}
   - {fileID: 1163790727}
+  - {fileID: 151639882}

@@ -2,14 +2,14 @@ using UnityEngine;
 
 public class RoadVisualizer : MonoBehaviour
 {
-    [SerializeField] private float laneSpacing = 1.5f;
-    [SerializeField] private float roadLength = 50f;
-    [SerializeField] private Color asphaltColor = new Color(0.08f, 0.08f, 0.09f, 1f);
-    [SerializeField] private Color markingColor = new Color(1f, 0.85f, 0.45f, 0.95f);
-    [SerializeField] private float markingThickness = 0.06f;
-    [SerializeField] private float asphaltInset = 0.02f;
-    [SerializeField] private int laneMin = -3;
-    [SerializeField] private int laneMax = 3;
+    [SerializeField] float laneSpacing = 1.5f;
+    [SerializeField] float roadLength = 50f;
+    [SerializeField] Color asphaltColor = new Color(0.08f, 0.08f, 0.09f, 1f);
+    [SerializeField] Color markingColor = new Color(1f, 0.85f, 0.45f, 0.95f);
+    [SerializeField] float markingThickness = 0.06f;
+    [SerializeField] float asphaltInset = 0.02f;
+    [SerializeField] int laneMin = -3;
+    [SerializeField] int laneMax = 3;
 
     void Start()
     {
