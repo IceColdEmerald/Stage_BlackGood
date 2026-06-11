@@ -16,7 +16,7 @@ public class PlayerController : MonoBehaviour
     int currentLane = 0;
     float targetY = 0f;
     
-    private SpriteRenderer spriteRenderer;
+    SpriteRenderer spriteRenderer;
     public bool IsInvincible { get; private set; } = false;
 
     void Start()
@@ -80,27 +80,28 @@ public class PlayerController : MonoBehaviour
         transform.position = pos;
     }
 
-    public void TriggerInvincibility()
+    public void PlayerHit()
     {
-        if (!IsInvincible && gameObject.activeInHierarchy)
-        {
-            StartCoroutine(InvincibilityFlashRoutine());
-        }
+        if (IsInvincible || !gameObject.activeInHierarchy) return;
+        StartCoroutine(InvincibilityRoutine());
     }
 
-    private IEnumerator InvincibilityFlashRoutine()
+    IEnumerator InvincibilityRoutine()
     {
         IsInvincible = true;
-        float elapsed = 0f;
+        float timer = 0f;
+        bool isVisible = true;
 
-        while (elapsed < invincibilityDuration)
+        while (timer < invincibilityDuration)
         {
-            if (spriteRenderer != null)
+            timer += Time.deltaTime;
+            
+            if (timer % (flashInterval * 2) < flashInterval)
             {
-                spriteRenderer.enabled = !spriteRenderer.enabled;
+                isVisible = !isVisible;
+                if (spriteRenderer != null) spriteRenderer.enabled = isVisible;
             }
-            yield return new WaitForSeconds(flashInterval);
-            elapsed += flashInterval;
+            yield return null;
         }
 
         if (spriteRenderer != null) spriteRenderer.enabled = true;

@@ -137,6 +137,20 @@ public class GameManager : MonoBehaviour
         if (txtLives != null) txtLives.text = "Lives - " + lives;
     }
 
+    public void AddLife()
+    {
+        if (gameOver) return;
+        lives++;
+        UpdateUI();
+    }
+
+    public void AddScore(int amount)
+    {
+        if (gameOver) return;
+        Score += amount;
+        UpdateUI();
+    }
+
     public void TakeDamage()
     {
         if (gameOver) return;

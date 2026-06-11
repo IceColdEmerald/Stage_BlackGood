@@ -4,17 +4,24 @@ using UnityEngine;
 
 public class ObstacleSpawner : MonoBehaviour
 {
-    enum ObstacleType { Standard, Car }
+    public enum ObstacleType { Standard, Car, Heart }
 
-    [Header("Standard Hazard Setup")]
+    [Header("Unified Warning Setup")]
+    [SerializeField] GameObject carDangerPrefab; 
+    [SerializeField] GameObject bigWarningPrefab; 
+    
+    [SerializeField] string dangerIconChildName = "Danger_Bubble_Icon";
+    [SerializeField] string heartIconChildName = "Health_Bubble_Icon";
+    [SerializeField] float flickerSpeed = 0.15f;
+
+    [Header("Obstacle Prefabs")]
     [SerializeField] GameObject obstaclePrefab;
-    [SerializeField] GameObject[] warningPrefabs;
-
-    [Header("Moving Car Setup")]
     [SerializeField] GameObject carObstaclePrefab;
-    [SerializeField] GameObject carWarningPrefab; 
-    [SerializeField] string carIconChildName = "Danger_Bubble_Icon"; 
-    [SerializeField] float carSpawnChance = 0.4f; 
+    [SerializeField] GameObject heartObstaclePrefab;
+
+    [Header("Spawn Probabilities")]
+    [SerializeField] [Range(0f, 1f)] float carSpawnChance = 0.35f;
+    [SerializeField] [Range(0f, 1f)] float heartSpawnChance = 0.15f;
 
     [Header("Dynamic Pacing Thresholds")]
     [SerializeField] float startSpawnInterval = 2.5f;
@@ -25,10 +32,11 @@ public class ObstacleSpawner : MonoBehaviour
     [SerializeField] float minIntervalVariance = 0.75f;
     [SerializeField] float maxIntervalVariance = 1.25f;
 
+    List<GameObject> warningPool = new List<GameObject>();
+    List<GameObject> bigWarningPool = new List<GameObject>();
     List<GameObject> obstaclePool = new List<GameObject>();
-    List<GameObject>[] warningPools;
     List<GameObject> carObstaclePool = new List<GameObject>();
-    List<GameObject> carWarningPool = new List<GameObject>();
+    List<GameObject> heartObstaclePool = new List<GameObject>();
     
     float spawnTimer;
     RoadVisualizer roadVisualizer;
@@ -37,19 +45,6 @@ public class ObstacleSpawner : MonoBehaviour
     {
         roadVisualizer = FindFirstObjectByType<RoadVisualizer>();
         spawnTimer = startSpawnInterval;
-
-        if (warningPrefabs != null)
-        {
-            warningPools = new List<GameObject>[warningPrefabs.Length];
-            for (int i = 0; i < warningPrefabs.Length; i++)
-            {
-                warningPools[i] = new List<GameObject>();
-            }
-        }
-        else
-        {
-            warningPools = new List<GameObject>[0];
-        }
     }
 
     void Update()
@@ -95,17 +90,14 @@ public class ObstacleSpawner : MonoBehaviour
             {
                 laneHasSpawn[i] = true;
                 waveIsEmpty = false;
-                laneTypes[i] = (Random.value < carSpawnChance) ? ObstacleType.Car : ObstacleType.Standard;
-                GenerateContinuousDifficultyColor(progress, out laneColors[i], out lanePassable[i]);
                 
-                if (laneTypes[i] == ObstacleType.Car && progress > 0.3f)
-                {
-                    carMovesRight[i] = (Random.value < 0.5f);
-                }
-                else
-                {
-                    carMovesRight[i] = false;
-                }
+                float typeRoll = Random.value;
+                if (typeRoll < carSpawnChance) laneTypes[i] = ObstacleType.Car;
+                else if (typeRoll < carSpawnChance + heartSpawnChance) laneTypes[i] = ObstacleType.Heart;
+                else laneTypes[i] = ObstacleType.Standard;
+
+                GenerateContinuousDifficultyColor(progress, out laneColors[i], out lanePassable[i]);
+                carMovesRight[i] = (laneTypes[i] == ObstacleType.Car && progress > 0.3f) ? (Random.value < 0.5f) : false;
 
                 if (lanePassable[i]) atLeastOneSafePath = true;
             }
@@ -119,9 +111,8 @@ public class ObstacleSpawner : MonoBehaviour
         {
             int forcedIndex = Random.Range(0, totalLanes);
             laneHasSpawn[forcedIndex] = true;
-            laneTypes[forcedIndex] = (Random.value < carSpawnChance) ? ObstacleType.Car : ObstacleType.Standard;
+            laneTypes[forcedIndex] = ObstacleType.Standard;
             GenerateContinuousDifficultyColor(progress, out laneColors[forcedIndex], out lanePassable[forcedIndex]);
-            carMovesRight[forcedIndex] = (laneTypes[forcedIndex] == ObstacleType.Car && progress > 0.3f) ? (Random.value < 0.5f) : false;
             if (lanePassable[forcedIndex]) atLeastOneSafePath = true;
         }
 
@@ -131,13 +122,12 @@ public class ObstacleSpawner : MonoBehaviour
             laneHasSpawn[escapeIndex] = true;
             laneColors[escapeIndex] = Color.black;
             lanePassable[escapeIndex] = true;
-            carMovesRight[escapeIndex] = false;
         }
 
         List<GameObject> activeWarnings = new List<GameObject>();
-        List<Coroutine> activeFlickers = new List<Coroutine>();
+        List<SpriteRenderer> flickeringIcons = new List<SpriteRenderer>();
 
-        float currentFlickerChance = progress * 0.5f;
+        float currentFlickerChance = Mathf.Lerp(0.1f, 0.85f, progress); 
 
         for (int i = 0; i < totalLanes; i++)
         {
@@ -145,144 +135,147 @@ public class ObstacleSpawner : MonoBehaviour
 
             float spawnY = (minLane + i) * roadVisualizer.GetLaneSpacing();
             GameObject warning = null;
+            bool useBigWarning = laneTypes[i] == ObstacleType.Standard && bigWarningPrefab != null && Random.value > 0.5f;
 
-            if (laneTypes[i] == ObstacleType.Car)
-            {
-                warning = GetPooledObject(carWarningPool, carWarningPrefab);
-                if (warning != null)
-                {
-                    PositionAtScreenEdge(warning, spawnY, carMovesRight[i] ? -1 : 1, isObject: false);
-                    
-                    // FLIP FIX: Maintain the exact scale size set on your prefab asset
-                    Vector3 currentScale = warning.transform.localScale;
-                    float flipDirection = carMovesRight[i] ? -1f : 1f;
-                    warning.transform.localScale = new Vector3(Mathf.Abs(currentScale.x) * flipDirection, currentScale.y, currentScale.z);
-
-                    Transform iconChild = warning.transform.Find(carIconChildName);
-                    SpriteRenderer targetRenderer = iconChild != null ? iconChild.GetComponent<SpriteRenderer>() : warning.GetComponentInChildren<SpriteRenderer>();
-                    
-                    if (targetRenderer != null) targetRenderer.color = laneColors[i];
-                }
-            }
-            else
-            {
-                if (warningPrefabs != null && warningPrefabs.Length > 0)
-                {
-                    int randomWarningIndex = Random.Range(0, warningPrefabs.Length);
-                    warning = GetPooledStandardWarning(randomWarningIndex);
-                    if (warning != null)
-                    {
-                        PositionAtScreenEdge(warning, spawnY, 1, isObject: false);
-                        
-                        // FLIP FIX: Keep the original prefab scale intact for standard hazards
-                        Vector3 currentScale = warning.transform.localScale;
-                        warning.transform.localScale = new Vector3(Mathf.Abs(currentScale.x), currentScale.y, currentScale.z);
-
-                        SpriteRenderer sr = warning.GetComponent<SpriteRenderer>();
-                        if (sr != null) sr.color = laneColors[i];
-                    }
-                }
-            }
+            if (useBigWarning) warning = GetPooledObject(bigWarningPool, bigWarningPrefab);
+            else warning = GetPooledObject(warningPool, carDangerPrefab);
 
             if (warning != null)
             {
-                SpriteRenderer[] renderers = warning.GetComponentsInChildren<SpriteRenderer>();
-                foreach (var r in renderers) if (r != null) r.enabled = true;
+                PositionAtScreenEdge(warning, spawnY, carMovesRight[i] ? -1 : 1, isObject: false);
+                Vector3 origScale = warning.transform.localScale;
+                float flipDirection = carMovesRight[i] ? -1f : 1f;
+                warning.transform.localScale = new Vector3(Mathf.Abs(origScale.x) * flipDirection, origScale.y, origScale.z);
 
+                bool iconFlickers = Random.value < currentFlickerChance;
+                bool bubbleFlickers;
+
+                if (laneTypes[i] == ObstacleType.Standard)
+                {
+                    bubbleFlickers = Random.value < currentFlickerChance;
+                }
+                else
+                {
+                    bubbleFlickers = iconFlickers && (Random.value < currentFlickerChance);
+                }
+
+                if (useBigWarning)
+                {
+                    SpriteRenderer warningRenderer = warning.GetComponent<SpriteRenderer>();
+                    if (warningRenderer != null)
+                    {
+                        warningRenderer.color = laneColors[i];
+                        if (bubbleFlickers) flickeringIcons.Add(warningRenderer);
+                    }
+                }
+                else
+                {
+                    Transform dangerIcon = warning.transform.Find(dangerIconChildName);
+                    Transform heartIcon = warning.transform.Find(heartIconChildName);
+                    SpriteRenderer bubbleRenderer = warning.GetComponent<SpriteRenderer>();
+                    SpriteRenderer dangerRenderer = dangerIcon != null ? dangerIcon.GetComponent<SpriteRenderer>() : null;
+                    SpriteRenderer heartRenderer = heartIcon != null ? heartIcon.GetComponent<SpriteRenderer>() : null;
+
+                    if (laneTypes[i] == ObstacleType.Standard)
+                    {
+                        if (dangerIcon != null) dangerIcon.gameObject.SetActive(false);
+                        if (heartIcon != null) heartIcon.gameObject.SetActive(false);
+                        if (bubbleRenderer != null) 
+                        {
+                            bubbleRenderer.color = laneColors[i]; 
+                            if (bubbleFlickers) flickeringIcons.Add(bubbleRenderer);
+                        }
+                    }
+                    else if (laneTypes[i] == ObstacleType.Car)
+                    {
+                        if (heartIcon != null) heartIcon.gameObject.SetActive(false);
+                        if (dangerIcon != null) dangerIcon.gameObject.SetActive(true);
+                        if (bubbleRenderer != null) 
+                        {
+                            bubbleRenderer.color = Color.black; 
+                            if (bubbleFlickers) flickeringIcons.Add(bubbleRenderer);
+                        }
+                        if (dangerRenderer != null) 
+                        {
+                            dangerRenderer.color = laneColors[i]; 
+                            if (iconFlickers) flickeringIcons.Add(dangerRenderer);
+                        }
+                    }
+                    else if (laneTypes[i] == ObstacleType.Heart)
+                    {
+                        if (dangerIcon != null) dangerIcon.gameObject.SetActive(false);
+                        if (heartIcon != null) heartIcon.gameObject.SetActive(true);
+                        if (bubbleRenderer != null) 
+                        {
+                            bubbleRenderer.color = Color.black; 
+                            if (bubbleFlickers) flickeringIcons.Add(bubbleRenderer);
+                        }
+                        if (heartRenderer != null) 
+                        {
+                            heartRenderer.color = laneColors[i]; 
+                            if (iconFlickers) flickeringIcons.Add(heartRenderer);
+                        }
+                    }
+                }
                 warning.SetActive(true);
                 activeWarnings.Add(warning);
-
-                if (Random.value < currentFlickerChance)
-                {
-                    activeFlickers.Add(StartCoroutine(TelegraphFlickerRoutine(warning)));
-                }
             }
         }
 
-        yield return new WaitForSeconds(warningDuration);
+        float timer = 0f;
+        float flashTimer = 0f;
+        bool isIconVisible = true;
 
-        foreach (var coroutine in activeFlickers) if (coroutine != null) StopCoroutine(coroutine);
+        while (timer < warningDuration)
+        {
+            if (GameManager.Instance.IsGameOver) break;
+            timer += Time.deltaTime;
+            flashTimer += Time.deltaTime;
+
+            if (flashTimer >= flickerSpeed)
+            {
+                flashTimer = 0f;
+                isIconVisible = !isIconVisible;
+                foreach (SpriteRenderer sr in flickeringIcons) if (sr != null) sr.enabled = isIconVisible;
+            }
+            yield return null;
+        }
+
         foreach (var w in activeWarnings) if (w != null) w.SetActive(false);
+        foreach (SpriteRenderer sr in flickeringIcons) if (sr != null) sr.enabled = true;
 
         if (GameManager.Instance.IsGameOver) yield break;
 
         for (int i = 0; i < totalLanes; i++)
         {
             if (!laneHasSpawn[i]) continue;
-
             float spawnY = (minLane + i) * roadVisualizer.GetLaneSpacing();
-            
-            if (laneTypes[i] == ObstacleType.Car)
-            {
-                GameObject car = GetPooledObject(carObstaclePool, carObstaclePrefab);
-                if (car != null)
-                {
-                    PositionAtScreenEdge(car, spawnY, carMovesRight[i] ? -1 : 1, isObject: true);
-                    CarObstacle carComp = car.GetComponent<CarObstacle>();
-                    if (carComp != null) carComp.Setup(laneColors[i], lanePassable[i], carMovesRight[i]);
-                    car.SetActive(true);
-                }
-            }
-            else
-            {
-                GameObject obstacle = GetPooledObject(obstaclePool, obstaclePrefab);
-                if (obstacle != null)
-                {
-                    PositionAtScreenEdge(obstacle, spawnY, 1, isObject: true);
-                    Obstacle obsComp = obstacle.GetComponent<Obstacle>();
-                    if (obsComp != null) obsComp.Setup(laneColors[i], lanePassable[i]);
-                    obstacle.SetActive(true);
-                }
-            }
-        }
-    }
+            GameObject prefabToSpawn = obstaclePrefab;
+            List<GameObject> targetPool = obstaclePool;
 
-    IEnumerator TelegraphFlickerRoutine(GameObject obj)
-    {
-        if (obj == null) yield break;
-        SpriteRenderer[] renderers = obj.GetComponentsInChildren<SpriteRenderer>();
-        while (obj != null && obj.activeInHierarchy)
-        {
-            foreach (var r in renderers) if (r != null) r.enabled = !r.enabled;
-            yield return new WaitForSeconds(0.12f);
-        }
-        if (renderers != null)
-        {
-            foreach (var r in renderers) if (r != null) r.enabled = true;
+            if (laneTypes[i] == ObstacleType.Car) { prefabToSpawn = carObstaclePrefab; targetPool = carObstaclePool; }
+            else if (laneTypes[i] == ObstacleType.Heart) { prefabToSpawn = heartObstaclePrefab; targetPool = heartObstaclePool; }
+
+            GameObject obj = GetPooledObject(targetPool, prefabToSpawn);
+            if (obj != null)
+            {
+                PositionAtScreenEdge(obj, spawnY, carMovesRight[i] ? -1 : 1, isObject: true);
+                BaseObstacle obsComp = obj.GetComponent<BaseObstacle>();
+                if (obsComp != null) obsComp.Setup(laneTypes[i], laneColors[i], lanePassable[i], carMovesRight[i]);
+                obj.SetActive(true);
+            }
         }
     }
 
     void GenerateContinuousDifficultyColor(float progress, out Color color, out bool isPassable)
     {
-        if (Random.value < 0.3f) 
-        {
-            isPassable = true;
-            color = Color.black;
-            return;
-        }
-
+        if (Random.value < 0.3f) { isPassable = true; color = Color.black; return; }
         isPassable = false;
         Color[] vividColors = { Color.red, Color.green, Color.yellow, Color.magenta, Color.cyan };
         Color chosenColor = vividColors[Random.Range(0, vividColors.Length)];
-
-        if (progress < 0.33f)
-        {
-            color = chosenColor;
-        }
-        else if (progress < 0.66f)
-        {
-            float shiftProgress = (progress - 0.33f) / 0.33f;
-            color = Color.Lerp(chosenColor, Color.gray, shiftProgress);
-        }
-        else
-        {
-            float finalProgress = (progress - 0.66f) / 0.34f;
-            float targetGrayValue = Random.Range(0.12f, 0.32f);
-            Color endgameGray = new Color(targetGrayValue, targetGrayValue, targetGrayValue, 1f);
-            
-            Color midGameMuted = Color.Lerp(chosenColor, Color.gray, 1f);
-            color = Color.Lerp(midGameMuted, endgameGray, finalProgress);
-        }
+        if (progress < 0.33f) color = chosenColor;
+        else if (progress < 0.66f) color = Color.Lerp(chosenColor, Color.gray, (progress - 0.33f) / 0.33f);
+        else color = Color.Lerp(Color.gray, new Color(0.2f, 0.2f, 0.2f, 1f), (progress - 0.66f) / 0.34f);
     }
 
     void PositionAtScreenEdge(GameObject obj, float yPos, int sideSign, bool isObject)
@@ -290,52 +283,16 @@ public class ObstacleSpawner : MonoBehaviour
         if (obj == null || Camera.main == null) return;
         float halfWidth = Camera.main.orthographicSize * Camera.main.aspect;
         float screenEdgeX = Camera.main.transform.position.x + (halfWidth * sideSign);
-        
-        float finalX;
-        if (isObject)
-        {
-            finalX = screenEdgeX + (spawnXOffset * sideSign * 2f);
-        }
-        else
-        {
-            finalX = screenEdgeX - (spawnXOffset * sideSign);
-        }
-
+        float finalX = isObject ? screenEdgeX + (spawnXOffset * sideSign * 2f) : screenEdgeX - (spawnXOffset * sideSign);
         obj.transform.position = new Vector3(finalX, yPos, 0f);
-    }
-
-    GameObject GetPooledStandardWarning(int index)
-    {
-        if (warningPools == null || index < 0 || index >= warningPrefabs.Length) return null;
-        if (warningPrefabs[index] == null) return null;
-        
-        foreach (GameObject obj in warningPools[index])
-        {
-            if (obj != null && !obj.activeInHierarchy) return obj;
-        }
-        
-        GameObject newObj = Instantiate(warningPrefabs[index]);
-        if (newObj != null)
-        {
-            newObj.transform.SetParent(transform);
-            warningPools[index].Add(newObj);
-        }
-        return newObj;
     }
 
     GameObject GetPooledObject(List<GameObject> pool, GameObject prefab)
     {
-        if (prefab == null || pool == null) return null;
-        foreach (GameObject obj in pool)
-        {
-            if (obj != null && !obj.activeInHierarchy) return obj;
-        }
-        GameObject newObj = Instantiate(prefab);
-        if (newObj != null)
-        {
-            newObj.transform.SetParent(transform);
-            pool.Add(newObj);
-        }
+        if (prefab == null) return null;
+        foreach (GameObject obj in pool) if (obj != null && !obj.activeInHierarchy) return obj;
+        GameObject newObj = Instantiate(prefab, transform);
+        pool.Add(newObj);
         return newObj;
     }
 }
