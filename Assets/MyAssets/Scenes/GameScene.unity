@@ -349,12 +349,18 @@ MonoBehaviour:
   bigWarningPrefab: {fileID: 179354849284521580, guid: eeaeef2c1591e4947bb4113a343863b1, type: 3}
   dangerIconChildName: Danger_Bubble_Icon
   heartIconChildName: Health_Bubble_Icon
+  colorIconChildName: Color_Bubble_Icon
+  flashIconChildName: Flash_Bubble_Icon
+  spawnIconChildName: Spawn_Bubble_Icon
   flickerSpeed: 0.15
   obstaclePrefab: {fileID: 3246605174902914929, guid: 8974faff9dc249940b42d22a54d0fc4e, type: 3}
   carObstaclePrefab: {fileID: 6664012287302956002, guid: d455db9b800fa9140b2ec6fb2a6d3e53, type: 3}
   heartObstaclePrefab: {fileID: 4371695728877535736, guid: d9cf166ab0b2abd4f83a757b6f41ece5, type: 3}
+  colorUpgradePrefab: {fileID: 5584053656652202243, guid: 573b91576f1cabc45a29c8024a79afdf, type: 3}
+  flashUpgradePrefab: {fileID: 1480650830331272784, guid: 85602d724636c7c4f938090db42d0ed8, type: 3}
+  spawnUpgradePrefab: {fileID: 7582947690055310944, guid: 306fd68f5223bdb4fac70ae76dfa4e74, type: 3}
   carSpawnChance: 0.4
-  heartSpawnChance: 0.15
+  upgradeSpawnChance: 0.15
   startSpawnInterval: 4.5
   endSpawnInterval: 1.1
   startWarningDuration: 2.2
@@ -811,7 +817,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   hotbarRT: {fileID: 1927298670}
-  moveSpeed: 3
+  baseMoveSpeed: 3
+  maxMoveSpeed: 7
+  moveAcceleration: 0.02
   horizontalMargin: 0.5
   laneSpacing: 1.5
   laneSwitchSpeed: 12

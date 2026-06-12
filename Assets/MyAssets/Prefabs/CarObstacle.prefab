@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 5355035968681380646}
   m_Layer: 0
   m_Name: CarObstacle
-  m_TagString: Untagged
+  m_TagString: Obstacle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -151,3 +151,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e6df4754e4c69847a4ba30c1a6bc00a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BaseObstacle
+  carSpeedMultiplier: 1.75

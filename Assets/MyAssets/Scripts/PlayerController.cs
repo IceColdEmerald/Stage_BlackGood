@@ -4,7 +4,11 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] RectTransform hotbarRT;
-    [SerializeField] float moveSpeed = 3f;
+
+    [Header("Movement Speed & Acceleration")]
+    [SerializeField] float baseMoveSpeed = 3f;
+    [SerializeField] float maxMoveSpeed = 7f;
+    [SerializeField] float moveAcceleration = 0.02f;
     [SerializeField] float horizontalMargin = 0.5f;
     [SerializeField] float laneSpacing = 1.5f;
     [SerializeField] float laneSwitchSpeed = 12f;
@@ -15,6 +19,7 @@ public class PlayerController : MonoBehaviour
 
     int currentLane = 0;
     float targetY = 0f;
+    float currentMoveSpeed;
     
     SpriteRenderer spriteRenderer;
     public bool IsInvincible { get; private set; } = false;
@@ -23,6 +28,8 @@ public class PlayerController : MonoBehaviour
     {
         currentLane = 0;
         targetY = 0f;
+        currentMoveSpeed = baseMoveSpeed;
+
         Vector3 p = transform.position;
         p.y = 0f;
         p.z = 0f;
@@ -34,9 +41,19 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        HandlePlayerSpeedScaling();
         HandleHorizontalMovement();
         HandleLaneSwitching();
         SmoothMoveToLane();
+    }
+
+    void HandlePlayerSpeedScaling()
+    {
+        if (currentMoveSpeed < maxMoveSpeed)
+        {
+            currentMoveSpeed += moveAcceleration * Time.deltaTime;
+            currentMoveSpeed = Mathf.Min(currentMoveSpeed, maxMoveSpeed);
+        }
     }
 
     void HandleHorizontalMovement()
@@ -45,7 +62,8 @@ public class PlayerController : MonoBehaviour
         Vector3 pos = transform.position;
         float halfWorldWidth = 0.5f * Camera.main.orthographicSize * Camera.main.aspect * 2f;
         float limit = Mathf.Max(0.1f, halfWorldWidth - horizontalMargin);
-        pos.x += horizontalInput * moveSpeed * Time.deltaTime;
+        
+        pos.x += horizontalInput * currentMoveSpeed * Time.deltaTime;
         pos.x = Mathf.Clamp(pos.x, -limit, limit);
         transform.position = pos;
     }
@@ -80,10 +98,11 @@ public class PlayerController : MonoBehaviour
         transform.position = pos;
     }
 
-    public void PlayerHit()
+    public bool PlayerHit()
     {
-        if (IsInvincible || !gameObject.activeInHierarchy) return;
+        if (IsInvincible || !gameObject.activeInHierarchy) return false;
         StartCoroutine(InvincibilityRoutine());
+        return true;
     }
 
     IEnumerator InvincibilityRoutine()
