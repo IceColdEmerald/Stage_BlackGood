@@ -1,0 +1,59 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/MyAssets/UI/StartScreen.uss?fileID=7433441132597879392&amp;guid=576066b6413ed394d9930129593b31fd&amp;type=3#StartScreen"/>
+    <ui:VisualElement name="VisualElement" class="root" style="background-image: url(&quot;project://database/Assets/MyAssets/Sprites/Background.png?fileID=2800000&amp;guid=7e502aa4f98215548a14a5630e4ae2b0&amp;type=3#Background&quot;); -unity-font-definition: url(&quot;project://database/Assets/MyAssets/Fonts/mania.ttf?fileID=12800000&amp;guid=38c45d44ba86a014eb54a2f36a8e06df&amp;type=3#mania&quot;);">
+        <ui:VisualElement class="top-section" style="flex-direction: column; -unity-text-align: upper-center; justify-content: center; align-self: auto;">
+            <ui:Label text="BLACK INSTINCT" class="title" style="font-size: 80px;"/>
+            <ui:Label text="HOW FAR CAN YOU FOLLOW BLACK?" class="subtitle" style="font-size: 25px;"/>
+        </ui:VisualElement>
+        <ui:VisualElement class="middle-section" style="flex-direction: row; justify-content: center; align-self: auto; align-content: auto; align-items: center; top: 12%; left: -8%;">
+            <ui:VisualElement class="stats-panel" style="flex-direction: column; justify-content: space-between; align-self: auto; align-content: auto; color: rgb(255, 255, 255); align-items: center; width: 50%;">
+                <ui:Label text="SCORE" class="section-header" style="font-size: 20px; color: rgb(255, 180, 0);"/>
+                <ui:Label text="012345" class="score-value" style="font-size: 35px;"/>
+                <ui:Label text="NEW HIGHSCORE!" class="highlight" style="align-self: center; display: none;"/>
+                <ui:VisualElement name="VisualElement" class="stats-list" style="margin-top: 0; top: 5%; background-color: rgba(0, 0, 0, 0.49); border-left-color: rgb(72, 68, 68); border-right-color: rgb(72, 68, 68); border-top-color: rgb(72, 68, 68); border-bottom-color: rgb(72, 68, 68); border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px; border-left-width: 2px; border-top-left-radius: 15px; border-top-right-radius: 15px; border-bottom-right-radius: 15px; border-bottom-left-radius: 15px; padding-top: 1%; padding-right: 2%; padding-bottom: 1%; padding-left: 2%;">
+                    <ui:VisualElement class="stat-row" style="flex-direction: row;">
+                        <ui:Label text="SCORE:" class="stat-label"/>
+                        <ui:Label text="12,345" class="stat-value"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="horizontal-line" style="-unity-background-image-tint-color: rgb(213, 32, 32);"/>
+                    <ui:VisualElement class="stat-row" style="flex-direction: row;">
+                        <ui:Label text="SURVIVAL TIME:" class="stat-label"/>
+                        <ui:Label text="01:23.45" class="stat-value"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="horizontal-line"/>
+                    <ui:VisualElement class="stat-row" style="flex-direction: row;">
+                        <ui:Label text="MAX LANES:" class="stat-label"/>
+                        <ui:Label text="5" class="stat-value"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="horizontal-line"/>
+                    <ui:VisualElement class="stat-row" style="flex-direction: row;">
+                        <ui:Label text="PERFECT DODGES:" class="stat-label"/>
+                        <ui:Label text="42" class="stat-value"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="rating-panel" style="flex-direction: column;">
+                <ui:VisualElement class="stars-row" style="flex-direction: row; font-size: 120px;">
+                    <ui:Label text="★" class="star filled" style="font-size: 120px; -unity-text-outline-width: 0; -unity-text-outline-color: rgb(207, 160, 54); -unity-font-style: bold;"/>
+                    <ui:Label text="★" class="star filled" style="font-size: 120px; top: -19%; -unity-font-style: bold;"/>
+                    <ui:Label text="★" class="star empty" style="-unity-text-outline-color: rgb(0, 0, 0); color: rgb(36, 35, 35); font-size: 120px; -unity-font-style: bold;"/>
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-grow: 1; flex-direction: column; align-self: auto; justify-content: flex-start; align-content: center; align-items: center;">
+                    <ui:Label text="RATING" class="section-header" style="color: rgb(197, 175, 23); font-size: 32px;"/>
+                    <ui:Label text="GOOD" class="rating-value" style="color: rgb(255, 255, 255); font-size: 64px; top: -10%;"/>
+                    <ui:Label text="NICE REACTIONS!" class="rating-text" style="color: rgb(255, 255, 255); font-size: 20px;"/>
+                    <ui:Label text="KEEP FOLLOWING BLACK." class="rating-subtext" style="color: rgb(255, 255, 255); font-size: 20px;"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement class="bottom-section" style="flex-direction: row; justify-content: center; padding-left: 0; margin-top: 0; position: relative; bottom: -15%;">
+            <ui:Button text="PLAY AGAIN" class="btn secondary" style="width: 15%; height: 150%; -unity-background-image-tint-color: rgba(255, 255, 255, 0.15); border-top-left-radius: 10px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px; border-top-width: 3px; border-right-width: 3px; border-bottom-width: 3px; border-left-width: 3px;"/>
+            <ui:Button text="NEXT RUN" class="btn primary" style="margin-left: 10%; margin-right: 10%; height: 150%; width: 15%; background-color: rgba(255, 204, 0, 0.29); color: rgb(255, 255, 255); border-top-width: 3px; border-left-width: 3px; border-bottom-width: 3px; border-right-width: 3px; border-top-right-radius: 10px; border-top-left-radius: 10px; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;"/>
+            <ui:Button text="LEADERBOARD" class="btn secondary" style="width: 15%; height: 150%; border-top-width: 3px; border-right-width: 3px; border-bottom-width: 3px; border-left-width: 3px; border-top-left-radius: 10px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px;"/>
+        </ui:VisualElement>
+        <ui:VisualElement style="flex-grow: 1; align-items: center; align-self: center; align-content: center; flex-direction: row; justify-content: center; top: auto; border-top-left-radius: 10px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px; border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px; border-left-width: 2px; width: auto; height: auto; font-size: 20px; border-left-color: rgb(51, 51, 51); border-right-color: rgb(51, 51, 51); border-top-color: rgb(51, 51, 51); border-bottom-color: rgb(51, 51, 51); position: absolute; bottom: 2%;">
+            <ui:Label text="TIP:" style="color: rgb(217, 180, 18);"/>
+            <ui:Label text="Only the black Objects are safe" style="color: rgb(88, 87, 87);"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

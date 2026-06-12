@@ -1,0 +1,147 @@
+.root {
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background-color: #0a0a0a;
+    padding: 20px;
+}
+
+/* ================= HEADER ================= */
+.header {
+    height: 18%;
+    justify-content: center;
+    align-items: center;
+}
+
+.title {
+    font-size: 42px;
+    unity-font-style: bold;
+    color: white;
+    letter-spacing: 2px;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: #cfcfcf;
+    margin-top: 6px;
+}
+
+/* ================= MIDDLE ================= */
+.middle {
+    flex-direction: row;
+    height: 60%;
+    justify-content: space-between;
+}
+
+/* panels */
+.panel {
+    flex-grow: 1;
+    padding: 20px;
+    margin: 10px;
+    background-color: #111111;
+    border-radius: 10px;
+}
+
+/* LEFT */
+.left-panel {
+    flex-direction: column;
+}
+
+.section-title {
+    font-size: 14px;
+    color: #ffcc00;
+    margin-bottom: 6px;
+}
+
+.score {
+    font-size: 52px;
+    color: white;
+    unity-font-style: bold;
+}
+
+.highlight {
+    color: #00ff88;
+    margin-top: 6px;
+}
+
+.stats {
+    margin-top: 20px;
+    color: #bfbfbf;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* RIGHT */
+.right-panel {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.stars {
+    flex-direction: row;
+    margin-bottom: 10px;
+}
+
+.star {
+    font-size: 32px;
+    margin: 2px;
+}
+
+.filled {
+    color: gold;
+}
+
+.empty {
+    color: #333333;
+}
+
+.rating {
+    font-size: 28px;
+    color: white;
+    unity-font-style: bold;
+}
+
+.feedback {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #aaaaaa;
+    text-align: center;
+    max-width: 200px;
+}
+
+/* ================= BOTTOM ================= */
+.bottom {
+    height: 22%;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn {
+    width: 220px;
+    height: 40px;
+    background-color: #1a1a1a;
+    color: white;
+    border-radius: 6px;
+}
+
+.primary {
+    background-color: #ffcc00;
+    color: black;
+}
+
+.tip {
+    font-size: 11px;
+    color: #777777;
+    margin-top: 10px;
+}
+
+.horizontale-line {
+    height: 2px;
+    width: 100% 
+    background-color: #888888;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
