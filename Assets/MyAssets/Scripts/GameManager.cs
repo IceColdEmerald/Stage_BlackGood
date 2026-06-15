@@ -1,6 +1,7 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -13,6 +14,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] RoadVisualizer roadVisualizer;
 
     public int lives = 3;
+
+    public int PerfectDodges { get; private set; }
 
     [SerializeField] float firstExpansionTime = 60f;
     [SerializeField] float secondExpansionTime = 120f;
@@ -97,6 +100,11 @@ public class GameManager : MonoBehaviour
         Score += currentSpeed * Time.deltaTime;
     }
 
+    public void AddPerfectDodge()
+    {
+        PerfectDodges++;
+    }
+
     void HandleProgression()
     {
         if (GameTime >= firstExpansionTime && allowedLaneRange == 1 && !IsCameraZooming)
@@ -166,8 +174,24 @@ public class GameManager : MonoBehaviour
         int finalScore = Mathf.FloorToInt(Score);
         HighScore = Mathf.Max(finalScore, HighScore);
         PlayerPrefs.SetInt("HighScore", HighScore);
+
+        // Last run stats
+        PlayerPrefs.SetInt("LastScore", finalScore);
+        PlayerPrefs.SetFloat("LastSurvivalTime", GameTime);
+        PlayerPrefs.SetInt("LastMaxLanes", allowedLaneRange * 2 + 1);
+        PlayerPrefs.SetInt("LastPerfectDodges", PerfectDodges);
+
         PlayerPrefs.Save();
         Debug.Log("GAME OVER");
+
+        if (HighScoreManager.IsTop10(finalScore))
+        {
+            // show popup
+        }
+        else
+        {
+            SceneManager.LoadScene("HighScoreScene");
+        }
     }
 
     public float GetBaseOrthoSize() => baseOrthoSize;

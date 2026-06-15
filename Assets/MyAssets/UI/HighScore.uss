@@ -8,10 +8,14 @@
     width: 90%;
     padding: 25px;
     background-color: rgba(0,0,0,0.85);
+    flex-direction: column;
 }
 
 #leaderbord {
-    max-height: 100%;
+    flex-grow: 1;
+    width: 95%;
+    flex-direction: column;
+    align-self: center;
 }
 
 #title {
@@ -33,6 +37,13 @@
     border-bottom-width: 2px;
     border-bottom-color: rgb(255,210,0);
     margin-bottom: 10px;
+    height: 8%;
+}
+
+#entries
+{
+    flex-grow: 1;
+    flex-direction: column;
 }
 
 .header-rank {
@@ -51,32 +62,28 @@
 }
 
 .entry-row {
+    flex-grow: 1;
     flex-direction: row;
-    height: 40px;
     align-items: center;
     border-bottom-width: 1px;
     border-bottom-color: rgba(255,255,255,0.1);
-    margin-top: 2%;
-    margin-bottem: 2%;
+    height: 10%;
 }
 
 .rank {
-    width: 80px;
+    width: 15%;
     color: white;
-    height: 170%
 }
 
 .player {
     flex-grow: 1;
     color: white;
     width: 65%;
-    height: 170%
 }
 
 .score {
-    width: 200px;
+    width: 25%;
     color: white;
-    height: 170%
 }
 
 #bottom-panel {
