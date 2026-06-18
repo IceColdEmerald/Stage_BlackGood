@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -20,8 +21,8 @@ public class PlayerController : MonoBehaviour
     int currentLane = 0;
     float targetY = 0f;
     float currentMoveSpeed;
-    
-    SpriteRenderer spriteRenderer;
+
+    SpriteRenderer[] allSpriteRenderers;
     public bool IsInvincible { get; private set; } = false;
 
     void Start()
@@ -35,8 +36,12 @@ public class PlayerController : MonoBehaviour
         p.z = 0f;
         transform.position = p;
 
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        if (spriteRenderer != null) spriteRenderer.sortingOrder = 100;
+        allSpriteRenderers = GetComponentsInChildren<SpriteRenderer>();
+        
+        foreach (var sr in allSpriteRenderers)
+        {
+            if (sr != null) sr.sortingOrder = 100;
+        }
     }
 
     void Update()
@@ -118,12 +123,22 @@ public class PlayerController : MonoBehaviour
             if (timer % (flashInterval * 2) < flashInterval)
             {
                 isVisible = !isVisible;
-                if (spriteRenderer != null) spriteRenderer.enabled = isVisible;
+
+                for (int i = 0; i < allSpriteRenderers.Length; i++)
+                {
+                    if (allSpriteRenderers[i] != null) 
+                        allSpriteRenderers[i].enabled = isVisible;
+                }
             }
             yield return null;
         }
 
-        if (spriteRenderer != null) spriteRenderer.enabled = true;
+        for (int i = 0; i < allSpriteRenderers.Length; i++)
+        {
+            if (allSpriteRenderers[i] != null) 
+                allSpriteRenderers[i].enabled = true;
+        }
+        
         IsInvincible = false;
     }
 }
