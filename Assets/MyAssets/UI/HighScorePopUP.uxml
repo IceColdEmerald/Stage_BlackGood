@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/MyAssets/UI/HighScorePopup.uss?fileID=7433441132597879392&amp;guid=0481404fc6ab9374fb820980bd0087bb&amp;type=3#HighScorePopup"/>
+    <ui:VisualElement name="NameInputPopup" class="popup-root">
+        <ui:VisualElement class="popup-panel">
+            <ui:Label text="NEW HIGH SCORE!" class="popup-title"/>
+            <ui:Label text="ENTER YOUR NAME" class="popup-subtitle"/>
+            <ui:Label name="CurrentName" text="A A A" class="name-display"/>
+            <ui:Label text="↑ / ↓ CHANGE LETTER   |   ENTER NEXT" class="hint"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

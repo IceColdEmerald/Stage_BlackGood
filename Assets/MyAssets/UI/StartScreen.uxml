@@ -8,7 +8,7 @@
         <ui:VisualElement class="middle-section" style="flex-direction: row; justify-content: center; align-self: auto; align-content: auto; align-items: center; top: 12%; left: -8%;">
             <ui:VisualElement class="stats-panel" style="flex-direction: column; justify-content: space-between; align-self: auto; align-content: auto; color: rgb(255, 255, 255); align-items: center; width: 50%;">
                 <ui:Label text="SCORE" class="section-header" style="font-size: 20px; color: rgb(255, 180, 0);"/>
-                <ui:Label text="012345" class="score-value" style="font-size: 35px;"/>
+                <ui:Label text="012345" name="score-label" class="score-value" style="font-size: 35px;"/>
                 <ui:Label text="NEW HIGHSCORE!" class="highlight" style="align-self: center; display: none;"/>
                 <ui:VisualElement name="VisualElement" class="stats-list" style="margin-top: 0; top: 5%; background-color: rgba(0, 0, 0, 0.49); border-left-color: rgb(72, 68, 68); border-right-color: rgb(72, 68, 68); border-top-color: rgb(72, 68, 68); border-bottom-color: rgb(72, 68, 68); border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px; border-left-width: 2px; border-top-left-radius: 15px; border-top-right-radius: 15px; border-bottom-right-radius: 15px; border-bottom-left-radius: 15px; padding-top: 1%; padding-right: 2%; padding-bottom: 1%; padding-left: 2%;">
                     <ui:VisualElement class="stat-row" style="flex-direction: row;">
@@ -46,7 +46,7 @@
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement class="bottom-section" style="flex-direction: row; justify-content: center; padding-left: 0; margin-top: 0; position: relative; bottom: auto; top: 30%;">
+        <ui:VisualElement class="bottom-section" style="flex-direction: row; justify-content: center; padding-left: 0; margin-top: 0; position: absolute; bottom: 10%; top: auto;">
             <ui:Button text="PLAY AGAIN" name="play-again-button" class="btn secondary" style="width: 15%; height: 150%; -unity-background-image-tint-color: rgba(255, 255, 255, 0.15); border-top-left-radius: 10px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px; border-top-width: 3px; border-right-width: 3px; border-bottom-width: 3px; border-left-width: 3px;"/>
             <ui:Button text="NEXT RUN" name="next-run-button" class="btn primary" style="margin-left: 10%; margin-right: 10%; height: 150%; width: 15%; background-color: rgba(255, 204, 0, 0.29); color: rgb(255, 255, 255); border-top-width: 3px; border-left-width: 3px; border-bottom-width: 3px; border-right-width: 3px; border-top-right-radius: 10px; border-top-left-radius: 10px; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;"/>
             <ui:Button text="LEADERBOARD" name="leaderboard-button" class="btn secondary" style="width: 15%; height: 150%; border-top-width: 3px; border-right-width: 3px; border-bottom-width: 3px; border-left-width: 3px; border-top-left-radius: 10px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px;"/>

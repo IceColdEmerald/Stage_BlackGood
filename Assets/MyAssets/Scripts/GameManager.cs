@@ -184,9 +184,9 @@ public class GameManager : MonoBehaviour
         PlayerPrefs.Save();
         Debug.Log("GAME OVER");
 
-        if (HighScoreManager.IsTop10(finalScore))
+        if (HighScoreManager.Instance.IsTop10(finalScore))
         {
-            // show popup
+            HighScoreNameInput.Instance.Open(finalScore);
         }
         else
         {

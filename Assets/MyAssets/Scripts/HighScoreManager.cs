@@ -2,26 +2,58 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-public static class HighScoreManager
+public class HighScoreManager : MonoBehaviour
 {
+    public static HighScoreManager Instance { get; private set; }
+
     private const string SaveKey = "Leaderboard";
 
-    public static List<HighScoreEntry> LoadScores()
+    private List<HighScoreEntry> cachedEntries = new List<HighScoreEntry>();
+
+    private void Awake()
+    {
+        // Singleton protection
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+
+        LoadScores(); // preload data once
+    }
+
+    // ---------------------------
+    // LOAD
+    // ---------------------------
+    public List<HighScoreEntry> LoadScores()
     {
         if (!PlayerPrefs.HasKey(SaveKey))
-            return new List<HighScoreEntry>();
+        {
+            cachedEntries = new List<HighScoreEntry>();
+            return cachedEntries;
+        }
 
         string json = PlayerPrefs.GetString(SaveKey);
 
         HighScoreData data = JsonUtility.FromJson<HighScoreData>(json);
 
-        return data.entries;
+        cachedEntries = data?.entries ?? new List<HighScoreEntry>();
+
+        return cachedEntries;
     }
 
-    public static void SaveScores(List<HighScoreEntry> entries)
+    // ---------------------------
+    // SAVE
+    // ---------------------------
+    public void SaveScores()
     {
-        HighScoreData data = new HighScoreData();
-        data.entries = entries;
+        HighScoreData data = new HighScoreData
+        {
+            entries = cachedEntries
+        };
 
         string json = JsonUtility.ToJson(data);
 
@@ -29,27 +61,53 @@ public static class HighScoreManager
         PlayerPrefs.Save();
     }
 
-    public static bool IsTop10(int score)
+    // ---------------------------
+    // CHECK TOP 10
+    // ---------------------------
+    public bool IsTop10(int score)
     {
-        List<HighScoreEntry> entries = LoadScores();
-
-        if (entries.Count < 10)
+        if (cachedEntries.Count < 10)
             return true;
 
-        return score > entries.Last().score;
+        return score > cachedEntries.Last().score;
     }
 
-    public static void AddEntry(HighScoreEntry entry)
+    // ---------------------------
+    // ADD ENTRY (string version)
+    // ---------------------------
+    public void AddPoints(string playerName, int score, float survivalTime = 0f, int maxLanes = 0)
     {
-        List<HighScoreEntry> entries = LoadScores();
+        HighScoreEntry entry = new HighScoreEntry
+        {
+            playerName = playerName,
+            score = score,
+            survivalTime = survivalTime,
+            maxLanes = maxLanes
+        };
 
-        entries.Add(entry);
+        AddEntry(entry);
+    }
 
-        entries = entries
+    // ---------------------------
+    // ADD ENTRY (core)
+    // ---------------------------
+    public void AddEntry(HighScoreEntry entry)
+    {
+        cachedEntries.Add(entry);
+
+        cachedEntries = cachedEntries
             .OrderByDescending(e => e.score)
             .Take(10)
             .ToList();
 
-        SaveScores(entries);
+        SaveScores();
+    }
+
+    // ---------------------------
+    // GET
+    // ---------------------------
+    public List<HighScoreEntry> GetScores()
+    {
+        return cachedEntries;
     }
 }

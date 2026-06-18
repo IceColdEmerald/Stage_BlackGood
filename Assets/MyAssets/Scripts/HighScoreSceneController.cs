@@ -1,25 +1,26 @@
-using UnityEngine;
-using UnityEngine.UIElements;
-using System.Collections.Generic;
 using System;
-using UnityEngine.SceneManagement;
+using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 
 public class HighScoreSceneController : MonoBehaviour
 {
     [SerializeField] private UIDocument uiDocument;
+
     private Button playAgainButton;
     private Button backButton;
-    private int currentIndex;
 
     private Button[] buttons;
     private Action[] buttonActions;
 
+    private int currentIndex;
+
     private void Start()
     {
-        List<HighScoreEntry> scores = HighScoreManager.LoadScores();
-
         VisualElement root = uiDocument.rootVisualElement;
+
         playAgainButton = root.Q<Button>("play-button");
         backButton = root.Q<Button>("back-button");
 
@@ -34,27 +35,48 @@ public class HighScoreSceneController : MonoBehaviour
         currentIndex = 0;
         SelectButton(currentIndex);
 
+        List<HighScoreEntry> scores = new();
+
+        if (HighScoreManager.Instance != null)
+        {
+            scores = HighScoreManager.Instance.LoadScores();
+        }
+        else
+        {
+            Debug.LogError("HighScoreManager.Instance is NULL!");
+        }
+
         for (int i = 0; i < 10; i++)
         {
             VisualElement row = root.Q<VisualElement>($"entry-{i + 1}");
+
+            if (row == null)
+            {
+                Debug.LogWarning($"Missing entry-{i + 1}");
+                continue;
+            }
 
             Label rank = row.Q<Label>(className: "rank");
             Label player = row.Q<Label>(className: "player");
             Label score = row.Q<Label>(className: "score");
 
+            if (rank == null || player == null || score == null)
+            {
+                Debug.LogWarning($"Missing labels in entry-{i + 1}");
+                continue;
+            }
+
+            rank.text = (i + 1).ToString();
+
             if (i < scores.Count)
             {
-                rank.text = (i + 1).ToString();
-
                 player.text =
-                    $"{scores[i].playerName}  " +
-                    $"({FormatTime(scores[i].survivalTime)} | {scores[i].maxLanes} lanes)";
+                    $"{scores[i].playerName} ({FormatTime(scores[i].survivalTime)} | {scores[i].maxLanes} lanes)";
 
                 score.text = scores[i].score.ToString();
             }
             else
             {
-                rank.text = (i + 1).ToString();
                 player.text = "---";
                 score.text = "---";
             }
@@ -63,6 +85,9 @@ public class HighScoreSceneController : MonoBehaviour
 
     private void Update()
     {
+        if (buttons == null)
+            return;
+
         if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
         {
             currentIndex--;
@@ -113,15 +138,13 @@ public class HighScoreSceneController : MonoBehaviour
         buttons[index].AddToClassList("selected");
     }
 
-    void OnPlayAgain()
+    private void OnPlayAgain()
     {
-        Debug.Log("Play Again");
         SceneManager.LoadScene("GameScene");
     }
 
-    void OnBack()
+    private void OnBack()
     {
-        Debug.Log("Back to Main Menu");
         SceneManager.LoadScene("StartScene");
     }
 

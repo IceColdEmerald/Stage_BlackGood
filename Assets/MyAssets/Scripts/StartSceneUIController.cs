@@ -45,15 +45,32 @@ public class StartSceneUIController : MonoBehaviour
 
         buttonActions = new Action[]
         {
-            OnPlayAgain,
-            OnNextRun,
-            OnLeaderboard
+            () => SceneManager.LoadScene("GameScene"),
+            () => SceneManager.LoadScene("GameScene"),
+            () => SceneManager.LoadScene("HighScoreScene")
         };
 
         // Mouse clicks
-        playAgainButton.clicked += OnPlayAgain;
-        nextRunButton.clicked += OnNextRun;
-        leaderboardButton.clicked += OnLeaderboard;
+        playAgainButton.clicked += () =>
+        {
+            currentIndex = 0;
+            SelectButton(currentIndex);
+            InvokeCurrent();
+        };
+
+        nextRunButton.clicked += () =>
+        {
+            currentIndex = 1;
+            SelectButton(currentIndex);
+            InvokeCurrent();
+        };
+
+        leaderboardButton.clicked += () =>
+        {
+            currentIndex = 2;
+            SelectButton(currentIndex);
+            InvokeCurrent();
+        };
 
         RegisterHoverCallbacks();
 
@@ -78,7 +95,6 @@ public class StartSceneUIController : MonoBehaviour
         if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
         {
             currentIndex--;
-
             if (currentIndex < 0)
                 currentIndex = buttons.Length - 1;
 
@@ -88,7 +104,6 @@ public class StartSceneUIController : MonoBehaviour
         if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
         {
             currentIndex++;
-
             if (currentIndex >= buttons.Length)
                 currentIndex = 0;
 
@@ -97,7 +112,7 @@ public class StartSceneUIController : MonoBehaviour
 
         if (Keyboard.current.enterKey.wasPressedThisFrame)
         {
-            buttonActions[currentIndex]?.Invoke();
+            InvokeCurrent();
         }
     }
 
@@ -185,5 +200,10 @@ public class StartSceneUIController : MonoBehaviour
     {
         Debug.Log("Leaderboard");
         SceneManager.LoadScene("HighScoreScene");
+    }
+
+    private void InvokeCurrent()
+    {
+        buttonActions[currentIndex]?.Invoke();
     }
 }
