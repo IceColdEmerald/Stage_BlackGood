@@ -90,7 +90,7 @@ public class StartSceneUIController : MonoBehaviour
             SelectButton(currentIndex);
         }
 
-        if (Keyboard.current.enterKey.wasPressedThisFrame)
+        if (Keyboard.current.leftCtrlKey.wasPressedThisFrame)
         {
             selectedAction?.Invoke();
         }
@@ -119,7 +119,7 @@ public class StartSceneUIController : MonoBehaviour
 
         buttons[index].AddToClassList("selected");
 
-        // Assign action for Enter key
+        // Assign action for LeftCtrl key
         if (buttons[index] == exitGameButton)
             selectedAction = ExitGame;
         else if (buttons[index] == nextRunButton)

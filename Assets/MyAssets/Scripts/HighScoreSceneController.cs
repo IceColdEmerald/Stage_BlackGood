@@ -108,7 +108,7 @@ public class HighScoreSceneController : MonoBehaviour
             SelectButton(currentIndex);
         }
 
-        if (Keyboard.current.enterKey.wasPressedThisFrame)
+        if (Keyboard.current.leftCtrlKey.wasPressedThisFrame)
         {
             buttonActions[currentIndex]?.Invoke();
         }
