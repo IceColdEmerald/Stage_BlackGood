@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.InputSystem;
@@ -9,19 +8,18 @@ public class StartSceneUIController : MonoBehaviour
 {
     [SerializeField] private UIDocument uiDocument;
 
-    private Button playAgainButton;
+    private Button exitGameButton;
     private Button nextRunButton;
     private Button leaderboardButton;
 
     private Button[] buttons;
-    private Action[] buttonActions;
-
     private int currentIndex;
+
+    private Action selectedAction;
 
     private Label scoreLabel;
     private Label survivalLabel;
     private Label lanesLabel;
-    private Label dodgesLabel;
     private Label ratingLabel;
 
     private Label star1;
@@ -32,55 +30,32 @@ public class StartSceneUIController : MonoBehaviour
     {
         VisualElement root = uiDocument.rootVisualElement;
 
-        playAgainButton = root.Q<Button>("play-again-button");
+        exitGameButton = root.Q<Button>("exit-game-button");
         nextRunButton = root.Q<Button>("next-run-button");
         leaderboardButton = root.Q<Button>("leaderboard-button");
 
         buttons = new[]
         {
-            playAgainButton,
+            exitGameButton,
             nextRunButton,
             leaderboardButton
         };
 
-        buttonActions = new Action[]
-        {
-            () => SceneManager.LoadScene("GameScene"),
-            () => SceneManager.LoadScene("GameScene"),
-            () => SceneManager.LoadScene("HighScoreScene")
-        };
-
         // Mouse clicks
-        playAgainButton.clicked += () =>
-        {
-            currentIndex = 0;
-            SelectButton(currentIndex);
-            InvokeCurrent();
-        };
+        exitGameButton.clicked += ExitGame;
+        nextRunButton.clicked += StartNewRun;
+        leaderboardButton.clicked += OpenLeaderboard;
 
-        nextRunButton.clicked += () =>
-        {
-            currentIndex = 1;
-            SelectButton(currentIndex);
-            InvokeCurrent();
-        };
-
-        leaderboardButton.clicked += () =>
-        {
-            currentIndex = 2;
-            SelectButton(currentIndex);
-            InvokeCurrent();
-        };
-
+        // Hover selection
         RegisterHoverCallbacks();
 
+        // Default selected button
         currentIndex = 0;
         SelectButton(currentIndex);
+
         scoreLabel = root.Q<Label>("score-label");
         survivalLabel = root.Q<Label>("survival-label");
         lanesLabel = root.Q<Label>("lanes-label");
-        dodgesLabel = root.Q<Label>("dodges-label");
-
         ratingLabel = root.Q<Label>("rating-label");
 
         star1 = root.Q<Label>("star1");
@@ -92,9 +67,13 @@ public class StartSceneUIController : MonoBehaviour
 
     private void Update()
     {
+        if (Keyboard.current == null)
+            return;
+
         if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
         {
             currentIndex--;
+
             if (currentIndex < 0)
                 currentIndex = buttons.Length - 1;
 
@@ -104,6 +83,7 @@ public class StartSceneUIController : MonoBehaviour
         if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
         {
             currentIndex++;
+
             if (currentIndex >= buttons.Length)
                 currentIndex = 0;
 
@@ -112,53 +92,9 @@ public class StartSceneUIController : MonoBehaviour
 
         if (Keyboard.current.enterKey.wasPressedThisFrame)
         {
-            InvokeCurrent();
+            selectedAction?.Invoke();
         }
     }
-
-    private void LoadLastRun()
-    {
-        int score = PlayerPrefs.GetInt("LastScore", 0);
-        float time = PlayerPrefs.GetFloat("LastSurvivalTime", 0);
-        int lanes = PlayerPrefs.GetInt("LastMaxLanes", 3);
-        int dodges = PlayerPrefs.GetInt("LastPerfectDodges", 0);
-
-        scoreLabel.text = score.ToString();
-        lanesLabel.text = lanes.ToString();
-        dodgesLabel.text = dodges.ToString();
-
-        int minutes = Mathf.FloorToInt(time / 60);
-        int seconds = Mathf.FloorToInt(time % 60);
-
-        survivalLabel.text = $"{minutes:00}:{seconds:00}";
-
-        UpdateRating(score);
-    }
-
-        private void UpdateRating(int score)
-        {
-            if (score >= 10000)
-            {
-                ratingLabel.text = "EXCELLENT";
-                star1.text = "★";
-                star2.text = "★";
-                star3.text = "★";
-            }
-            else if (score >= 5000)
-            {
-                ratingLabel.text = "GOOD";
-                star1.text = "★";
-                star2.text = "★";
-                star3.text = "☆";
-            }
-            else
-            {
-                ratingLabel.text = "TRY AGAIN";
-                star1.text = "★";
-                star2.text = "☆";
-                star3.text = "☆";
-            }
-        }
 
     private void RegisterHoverCallbacks()
     {
@@ -182,28 +118,74 @@ public class StartSceneUIController : MonoBehaviour
         }
 
         buttons[index].AddToClassList("selected");
+
+        // Assign action for Enter key
+        if (buttons[index] == exitGameButton)
+            selectedAction = ExitGame;
+        else if (buttons[index] == nextRunButton)
+            selectedAction = StartNewRun;
+        else if (buttons[index] == leaderboardButton)
+            selectedAction = OpenLeaderboard;
     }
 
-    private void OnPlayAgain()
+    private void StartNewRun()
     {
-        Debug.Log("Play Again");
         SceneManager.LoadScene("GameScene");
     }
 
-    private void OnNextRun()
+    private void OpenLeaderboard()
     {
-        Debug.Log("Next Run");
-        SceneManager.LoadScene("GameScene");
-    }
-
-    private void OnLeaderboard()
-    {
-        Debug.Log("Leaderboard");
         SceneManager.LoadScene("HighScoreScene");
     }
 
-    private void InvokeCurrent()
+    private void ExitGame()
     {
-        buttonActions[currentIndex]?.Invoke();
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
+
+    private void LoadLastRun()
+    {
+        int score = PlayerPrefs.GetInt("LastScore", 0);
+        float time = PlayerPrefs.GetFloat("LastSurvivalTime", 0);
+        int lanes = PlayerPrefs.GetInt("LastMaxLanes", 3);
+
+        scoreLabel.text = score.ToString();
+        lanesLabel.text = lanes.ToString();
+
+        int minutes = Mathf.FloorToInt(time / 60);
+        int seconds = Mathf.FloorToInt(time % 60);
+
+        survivalLabel.text = $"{minutes:00}:{seconds:00}";
+
+        UpdateRating(score);
+    }
+
+    private void UpdateRating(int score)
+    {
+        if (score >= 10000)
+        {
+            ratingLabel.text = "EXCELLENT";
+            star1.text = "★";
+            star2.text = "★";
+            star3.text = "★";
+        }
+        else if (score >= 5000)
+        {
+            ratingLabel.text = "GOOD";
+            star1.text = "★";
+            star2.text = "★";
+            star3.text = "☆";
+        }
+        else
+        {
+            ratingLabel.text = "TRY AGAIN";
+            star1.text = "★";
+            star2.text = "☆";
+            star3.text = "☆";
+        }
     }
 }
